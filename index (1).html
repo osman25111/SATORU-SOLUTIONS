@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SATORU FRP Solutions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: #fff;
+            overflow: hidden;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #00bcd4;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        label {
+            font-size: 14px;
+            color: #bbb;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: #252525;
+            color: #fff;
+        }
+        input:focus {
+            border-color: #00bcd4;
+            outline: none;
+        }
+        button {
+            padding: 10px;
+            background: #00bcd4;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #008c9e;
+        }
+        #notification {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        #telegram-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .confirmation-box {
+            padding: 20px;
+            background: #1e1e1e;
+            color: #fff;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-top: 5px solid #00bcd4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <a href="https://t.me/SATORU_251" target="_blank">
+        <img id="telegram-icon" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" width="50" alt="Telegram">
+    </a>
+    <div class="container">
+        <h1>SATORU FRP Solutions</h1>
+        <form id="orderForm">
+            <label for="imei">IMEI (15 digits):</label>
+            <input type="text" id="imei" placeholder="Enter IMEI (optional)" maxlength="15">
+            <label for="serial">Serial Number (12 digits):</label>
+            <input type="text" id="serial" placeholder="Enter Serial Number (optional)">
+            <button type="button" id="submitOrder">Submit Order</button>
+            <div id="notification"></div>
+        </form>
+    </div>
+    <div id="overlay" class="overlay" style="display: none;">
+        <div class="confirmation-box">
+            <p>Are you sure the details entered are correct?</p>
+            <button id="confirmYes">Yes</button>
+            <button id="confirmNo">No</button>
+        </div>
+    </div>
+    <script>
+        const botToken = '7595206564:AAGR6A_fWW1mBvzzs6Q_p66sa404MNqoRwg';
+        const chatId = '5760298739';
+        const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+        const submitButton = document.getElementById('submitOrder');
+        const overlay = document.getElementById('overlay');
+        const confirmYes = document.getElementById('confirmYes');
+        const confirmNo = document.getElementById('confirmNo');
+        const notification = document.getElementById('notification');
+        const imeiInput = document.getElementById('imei');
+
+        submitButton.addEventListener('click', () => {
+            overlay.style.display = 'flex';
+        });
+
+        confirmYes.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            const imei = imeiInput.value.trim();
+            const serial = document.getElementById('serial').value.trim();
+
+            if (!imei && !serial) {
+                notification.textContent = 'Error: Please enter either IMEI or Serial Number.';
+                notification.style.color = 'red';
+                return;
+            }
+
+            if (imei && !/^\d{15}$/.test(imei)) {
+                notification.textContent = 'Error: IMEI must be exactly 15 digits.';
+                notification.style.color = 'red';
+                return;
+            }
+
+            if (serial && !/^\d{12}$/.test(serial)) {
+                notification.textContent = 'Error: Serial Number must be exactly 12 digits.';
+                notification.style.color = 'red';
+                return;
+            }
+
+            notification.innerHTML = '<div class="spinner"></div>';
+            let message = imei ? `🚀 New Order Received:\nIMEI: ${imei}` : `🚀 New Order Received:\nSerial: ${serial}`;
+
+            fetch(telegramApiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chatId, text: message }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    notification.textContent = 'Order submitted successfully! We will contact you on Telegram.';
+                    notification.style.color = 'green';
+                    imeiInput.value = ''; // Clear the IMEI input value
+                } else {
+                    notification.textContent = `Error submitting order: ${data.description}`;
+                    notification.style.color = 'red';
+                }
+            })
+            .catch(error => {
+                notification.textContent = `Error: ${error.message}`;
+                notification.style.color = 'red';
+            });
+        });
+
+        confirmNo.addEventListener('click', () => {
+            overlay.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
