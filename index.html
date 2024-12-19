@@ -12,6 +12,7 @@
             background: #121212;
             color: #fff;
             overflow: hidden;
+            transition: background-color 0.3s ease;
         }
         .container {
             max-width: 600px;
@@ -20,10 +21,13 @@
             background: #1e1e1e;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
         }
         h1 {
             text-align: center;
             color: #00bcd4;
+            font-size: 2rem;
+            text-shadow: 0 0 10px #00bcd4, 0 0 20px #00bcd4, 0 0 30px #00bcd4;
         }
         form {
             display: flex;
@@ -40,6 +44,7 @@
             border-radius: 4px;
             background: #252525;
             color: #fff;
+            transition: border-color 0.3s ease;
         }
         input:focus {
             border-color: #00bcd4;
@@ -52,10 +57,11 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background 0.3s ease, transform 0.2s ease;
         }
         button:hover {
             background: #008c9e;
+            transform: scale(1.05);
         }
         #notification {
             margin-top: 10px;
@@ -66,6 +72,10 @@
             top: 20px;
             right: 20px;
             cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        #telegram-icon:hover {
+            transform: rotate(360deg);
         }
         .overlay {
             position: fixed;
@@ -86,6 +96,7 @@
             border-radius: 8px;
             text-align: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease;
         }
         .spinner {
             width: 50px;
@@ -99,6 +110,27 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .additional-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .additional-buttons button {
+            padding: 10px;
+            background: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .additional-buttons button:hover {
+            background: #d32f2f;
         }
     </style>
 </head>
@@ -116,6 +148,10 @@
             <button type="button" id="submitOrder">Submit Order</button>
             <div id="notification"></div>
         </form>
+        <div class="additional-buttons">
+            <button id="resetButton">Reset Form</button>
+            <button id="infoButton">More Info</button>
+        </div>
     </div>
     <div id="overlay" class="overlay" style="display: none;">
         <div class="confirmation-box">
@@ -135,6 +171,8 @@
         const confirmNo = document.getElementById('confirmNo');
         const notification = document.getElementById('notification');
         const imeiInput = document.getElementById('imei');
+        const resetButton = document.getElementById('resetButton');
+        const infoButton = document.getElementById('infoButton');
 
         submitButton.addEventListener('click', () => {
             overlay.style.display = 'flex';
@@ -190,6 +228,18 @@
 
         confirmNo.addEventListener('click', () => {
             overlay.style.display = 'none';
+        });
+
+        // Reset form functionality
+        resetButton.addEventListener('click', () => {
+            imeiInput.value = '';
+            document.getElementById('serial').value = '';
+            notification.textContent = '';
+        });
+
+        // Info button functionality
+        infoButton.addEventListener('click', () => {
+            alert('Here you can submit orders for IMEI and Serial Number checks. Please ensure the information is correct.');
         });
     </script>
 </body>
